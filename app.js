@@ -1,7 +1,7 @@
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 let articles = [];
-let saved = []; // { size, articleIdx, titre, cat, mat, sku, prixAchat, prixVente, desc, url }
+let saved = [];
 
 function parseLinks(raw) {
   return raw.split('\n')
@@ -17,7 +17,6 @@ function shorten(url) {
   } catch { return url.slice(0, 45); }
 }
 
-// Génère la description pour UNE taille précise
 function buildDesc(idx, size) {
   const cat    = val(`cat-${idx}`);
   const mat    = val(`mat-${idx}`);
@@ -230,32 +229,25 @@ function bindSizes() {
   });
 }
 
-// Enregistre UNE entrée PAR TAILLE
 function saveArticle(i) {
   const activeSizes = SIZES.filter(s => articles[i].sizes.has(s));
   if (!activeSizes.length) { toast('Sélectionnez au moins une taille.'); return; }
 
   const base = {
-    url:       articles[i].url,
+    url:        articles[i].url,
     articleNum: i + 1,
-    titre:     val(`titre-${i}`),
-    cat:       val(`cat-${i}`),
-    mat:       val(`mat-${i}`),
-    sku:       val(`sku-${i}`),
-    prixAchat: val(`prix-shein-${i}`),
-    prixVente: val(`prix-vente-${i}`),
+    titre:      val(`titre-${i}`),
+    cat:        val(`cat-${i}`),
+    mat:        val(`mat-${i}`),
+    sku:        val(`sku-${i}`),
+    prixAchat:  val(`prix-shein-${i}`),
+    prixVente:  val(`prix-vente-${i}`),
   };
 
-  // Supprimer les anciennes entrées de cet article
   saved = saved.filter(s => s.articleNum !== i + 1);
 
-  // Créer une entrée par taille
   activeSizes.forEach(size => {
-    saved.push({
-      ...base,
-      size,
-      desc: buildDesc(i, size),
-    });
+    saved.push({ ...base, size, desc: buildDesc(i, size) });
   });
 
   renderSaved();
@@ -281,7 +273,6 @@ function renderSaved() {
   if (!saved.length) { section.classList.add('hidden'); return; }
   section.classList.remove('hidden');
 
-  // Grouper par taille
   const bySize = {};
   SIZES.forEach(s => { bySize[s] = []; });
   saved.forEach((d, idx) => {
@@ -321,7 +312,7 @@ function renderSaved() {
 
 function copySizeCategory(size) {
   const entries = saved.filter(d => d.size === size);
-  const text = entries.map((d, i) => [
+  const text = entries.map(d => [
     `── ${size} · Article ${d.articleNum} ──`,
     d.titre ? `TITRE : ${d.titre} — Taille ${d.size}` : '',
     d.sku   ? `SKU   : ${d.sku}` : '',
@@ -368,13 +359,39 @@ function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+let activeTab = 0;
+
+function buildTabs() {
+  const bar = document.getElementById('tabsBar');
+  if (articles.length <= 1) { bar.classList.add('hidden'); return; }
+  bar.classList.remove('hidden');
+  bar.innerHTML = articles.map((_, i) => `
+    <button class="tab-btn${i === activeTab ? ' active' : ''}" onclick="switchTab(${i})">
+      Article ${i + 1}
+    </button>
+  `).join('');
+}
+
+function switchTab(i) {
+  activeTab = i;
+  document.querySelectorAll('.article-card').forEach((card, idx) => {
+    card.classList.toggle('hidden', idx !== i);
+  });
+  document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+    btn.classList.toggle('active', idx === i);
+  });
+}
+
 document.getElementById('generateBtn').addEventListener('click', () => {
   const links = parseLinks(document.getElementById('linksInput').value);
   if (!links.length) { toast('Aucun lien valide.'); return; }
+  activeTab = 0;
   articles = links.map(url => ({ url, sizes: new Set(SIZES) }));
   document.getElementById('cardsList').innerHTML = articles.map((a, i) => buildCard(a, i)).join('');
   document.getElementById('inputScreen').classList.add('hidden');
   document.getElementById('mainScreen').classList.remove('hidden');
+  buildTabs();
+  switchTab(0);
   bindSizes();
   updateTotals();
 });
@@ -382,7 +399,9 @@ document.getElementById('generateBtn').addEventListener('click', () => {
 document.getElementById('backBtn').addEventListener('click', () => {
   document.getElementById('inputScreen').classList.remove('hidden');
   document.getElementById('mainScreen').classList.add('hidden');
+  document.getElementById('tabsBar').classList.add('hidden');
   articles = [];
+  saved = [];
 });
 
 function toast(msg) {
