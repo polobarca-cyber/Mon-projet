@@ -1,6 +1,7 @@
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 let articles = [];
+let saved = []; // articles enregistrés
 
 function parseLinks(raw) {
   return raw.split('\n')
@@ -24,31 +25,53 @@ function buildDesc(idx) {
   const ptrine = val(`ptrine-${idx}`);
   const long   = val(`long-${idx}`);
   const manche = val(`manche-${idx}`);
+  const prix   = val(`prix-vente-${idx}`);
 
   const activeSizes = SIZES.filter(s => articles[idx].sizes.has(s));
-  const tailles = activeSizes.length ? activeSizes.join(', ') : '';
+  const tailles = activeSizes.length ? activeSizes.join(' / ') : '';
 
-  let desc = '';
-  if (titre) desc += `${titre}\n\n`;
-  if (mat)   desc += `Composition : ${mat}\n`;
-  if (tailles) desc += `Tailles disponibles : ${tailles}\n`;
+  const lines = [];
 
+  // Accroche
+  if (titre) lines.push(`✨ ${titre}`);
+  else if (cat) lines.push(`✨ ${cat} en vente sur Vinted`);
+
+  lines.push('');
+
+  // Infos produit
+  if (cat)     lines.push(`📦 Type : ${cat}`);
+  if (mat)     lines.push(`🧵 Composition : ${mat}`);
+  if (tailles) lines.push(`📏 Tailles disponibles : ${tailles}`);
+  if (prix)    lines.push(`💶 Prix : ${prix} €`);
+
+  // Mesures
   const mesures = [];
-  if (carr)   mesures.push(`Carrure ${carr} cm`);
-  if (ptrine) mesures.push(`Tour de poitrine ${ptrine} cm`);
-  if (long)   mesures.push(`Longueur ${long} cm`);
-  if (manche) mesures.push(`Longueur des manches ${manche} cm`);
-  if (mesures.length) desc += `\nMesures : ${mesures.join(' · ')}\n`;
+  if (carr)   mesures.push(`Carrure : ${carr} cm`);
+  if (ptrine) mesures.push(`Tour de poitrine : ${ptrine} cm`);
+  if (long)   mesures.push(`Longueur : ${long} cm`);
+  if (manche) mesures.push(`Manches : ${manche} cm`);
 
-  desc += '\nPortée une seule fois, aucun défaut.';
+  if (mesures.length) {
+    lines.push('');
+    lines.push('📐 Mesures :');
+    mesures.forEach(m => lines.push(`   • ${m}`));
+  }
 
-  const tags = ['#vinted'];
-  if (cat) tags.push(`#${cat.toLowerCase().replace(/\s+/g, '')}`);
-  if (tailles) activeSizes.forEach(s => tags.push(`#${s.toLowerCase()}`));
-  tags.push('#mode', '#femme', '#tendance', '#secondemain');
-  desc += '\n\n' + tags.join(' ');
+  lines.push('');
+  lines.push('✅ État : Portée une seule fois, aucun défaut. Comme neuve.');
+  lines.push('🚚 Envoi rapide — paiement sécurisé via Vinted.');
+  lines.push('💬 N\'hésitez pas à me poser vos questions !');
 
-  return desc.trim();
+  // Hashtags
+  lines.push('');
+  const tags = ['#vinted', '#secondemain', '#mode', '#femme', '#tendance', '#bonnaffaire'];
+  if (cat)     tags.push(`#${cat.toLowerCase().replace(/\s+/g,'')}`);
+  if (tailles) activeSizes.forEach(s => tags.push(`#taille${s.toLowerCase()}`));
+  if (mat && mat.toLowerCase().includes('viscose')) tags.push('#viscose');
+  if (mat && mat.toLowerCase().includes('coton'))   tags.push('#coton');
+  lines.push(tags.join(' '));
+
+  return lines.join('\n').trim();
 }
 
 function val(id) {
@@ -152,6 +175,8 @@ function buildCard(a, i) {
         <textarea class="field-input" id="desc-${i}" placeholder="Remplissez les champs ci-dessus pour générer la description..."></textarea>
       </div>
 
+      <button class="btn-save" onclick="saveArticle(${i})">✔ Enregistrer cet article</button>
+
     </div>
   </div>`;
 }
@@ -227,11 +252,101 @@ document.getElementById('generateBtn').addEventListener('click', () => {
   updateTotals();
 });
 
+function copyAllSaved() {
+  if (!saved.length) return;
+  const text = saved.map(d => [
+    `── Article ${d.num} ──`,
+    d.titre ? `TITRE : ${d.titre}` : '',
+    d.sku   ? `SKU   : ${d.sku}` : '',
+    d.prixVente ? `PRIX  : ${d.prixVente} €` : '',
+    '',
+    d.desc,
+  ].filter(l => l !== undefined).join('\n').trim()).join('\n\n');
+  navigator.clipboard.writeText(text).then(() => toast(`${saved.length} article(s) copié(s) !`));
+}
+
 document.getElementById('backBtn').addEventListener('click', () => {
   document.getElementById('inputScreen').classList.remove('hidden');
   document.getElementById('mainScreen').classList.add('hidden');
   articles = [];
 });
+
+function saveArticle(i) {
+  const d = {
+    num:      i + 1,
+    url:      articles[i].url,
+    titre:    val(`titre-${i}`),
+    cat:      val(`cat-${i}`),
+    mat:      val(`mat-${i}`),
+    sku:      val(`sku-${i}`),
+    prixAchat: val(`prix-shein-${i}`),
+    prixVente: val(`prix-vente-${i}`),
+    tailles:  SIZES.filter(s => articles[i].sizes.has(s)).join(' / '),
+    desc:     document.getElementById(`desc-${i}`)?.value || '',
+  };
+
+  // Remplacer si déjà sauvegardé
+  const existing = saved.findIndex(s => s.url === d.url);
+  if (existing >= 0) saved[existing] = d;
+  else saved.push(d);
+
+  renderSaved();
+
+  // Feedback visuel sur la carte
+  const btn = document.querySelector(`#article-${i} .btn-save`);
+  if (btn) { btn.textContent = '✔ Enregistré !'; btn.style.background = '#00c97a'; }
+  setTimeout(() => {
+    if (btn) { btn.textContent = '✔ Enregistrer cet article'; btn.style.background = ''; }
+  }, 2000);
+}
+
+function renderSaved() {
+  const section = document.getElementById('savedSection');
+  const list    = document.getElementById('savedList');
+  if (!saved.length) { section.classList.add('hidden'); return; }
+
+  section.classList.remove('hidden');
+  list.innerHTML = saved.map((d, i) => `
+    <div class="saved-card">
+      <div class="saved-header">
+        <span class="saved-num">Article ${d.num}</span>
+        <span class="saved-title">${d.titre || d.cat || '—'}</span>
+        <div class="saved-actions">
+          <button class="copy-btn" onclick="copySaved(${i})">Tout copier</button>
+          <button class="copy-btn del-btn" onclick="deleteSaved(${i})">✕</button>
+        </div>
+      </div>
+      <div class="saved-meta">
+        ${d.tailles ? `<span class="saved-tag">📏 ${d.tailles}</span>` : ''}
+        ${d.prixAchat ? `<span class="saved-tag">Achat : ${d.prixAchat} €</span>` : ''}
+        ${d.prixVente ? `<span class="saved-tag blue">Vente : ${d.prixVente} €</span>` : ''}
+        ${d.sku ? `<span class="saved-tag">SKU : ${d.sku}</span>` : ''}
+      </div>
+      ${d.desc ? `<pre class="saved-desc">${escHtml(d.desc)}</pre>` : ''}
+    </div>
+  `).join('');
+}
+
+function copySaved(i) {
+  const d = saved[i];
+  const text = [
+    d.titre ? `TITRE : ${d.titre}` : '',
+    d.sku   ? `SKU   : ${d.sku}` : '',
+    d.prixVente ? `PRIX  : ${d.prixVente} €` : '',
+    '',
+    d.desc,
+  ].filter(l => l !== undefined && !(l === '' && !d.desc)).join('\n').trim();
+  navigator.clipboard.writeText(text).then(() => toast('Article copié !'));
+}
+
+function deleteSaved(i) {
+  saved.splice(i, 1);
+  renderSaved();
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
 function toast(msg) {
   let t = document.getElementById('_toast');
