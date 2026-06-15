@@ -8,34 +8,42 @@
 </head>
 <body>
 
-  <header>
-    <div class="logo">Shein → Vinted</div>
-  </header>
-
-  <main>
-    <div class="card">
-      <h2>Collez vos liens Shein</h2>
-      <p class="hint">Un lien par ligne.</p>
+  <div id="inputScreen" class="input-screen">
+    <div class="input-box">
+      <div class="input-logo">Shein → Vinted</div>
+      <p class="input-sub">Collez vos liens Shein, un par ligne</p>
       <textarea id="linksInput" placeholder="https://fr.shein.com/...&#10;https://fr.shein.com/..."></textarea>
-      <div class="btn-row">
-        <button id="generateBtn" class="btn-primary">Charger les articles</button>
-        <button id="clearBtn" class="btn-secondary">Effacer</button>
-      </div>
+      <button id="generateBtn" class="btn-go">Charger les articles</button>
     </div>
+  </div>
 
-    <div id="articlesSection" class="hidden">
-      <div id="articlesList"></div>
-      <div class="card final-card">
-        <div class="btn-row">
-          <button id="copyAllBtn" class="btn-primary">Tout copier</button>
-          <button id="exportBtn" class="btn-dark">Exporter CSV</button>
+  <div id="mainScreen" class="hidden">
+    <header>
+      <span class="logo">Shein → Vinted</span>
+      <button id="backBtn" class="btn-back">+ Nouveaux liens</button>
+    </header>
+
+    <div class="cards-wrapper">
+      <div id="cardsList"></div>
+      <div class="totals-bar">
+        <div class="total-block">
+          <span class="total-label">TOTAL ACHAT</span>
+          <span class="total-val" id="totalAchat">0,00 €</span>
         </div>
-        <div id="copyPreview" class="copy-preview hidden"></div>
+        <div class="total-sep"></div>
+        <div class="total-block">
+          <span class="total-label">TOTAL REVENTE</span>
+          <span class="total-val pink" id="totalRevente">0,00 €</span>
+        </div>
+        <div class="total-sep"></div>
+        <div class="total-block">
+          <span class="total-label">BÉNÉFICE</span>
+          <span class="total-val green" id="totalBenef">0,00 €</span>
+        </div>
       </div>
     </div>
-  </main>
+  </div>
 
-  <div class="toast" id="toast"></div>
   <script src="app.js"></script>
 </body>
 </html>

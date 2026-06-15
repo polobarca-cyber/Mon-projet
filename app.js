@@ -12,82 +12,193 @@ function parseLinks(raw) {
 function shorten(url) {
   try {
     const u = new URL(url);
-    return u.hostname + u.pathname.slice(0, 38) + (u.pathname.length > 38 ? '…' : '');
-  } catch { return url.slice(0, 50); }
+    return u.hostname + u.pathname.slice(0, 35) + (u.pathname.length > 35 ? '…' : '');
+  } catch { return url.slice(0, 45); }
 }
 
-document.getElementById('generateBtn').addEventListener('click', () => {
-  const links = parseLinks(document.getElementById('linksInput').value);
-  if (!links.length) { toast('Aucun lien valide.'); return; }
-  articles = links.map(url => ({ url, sizes: new Set(SIZES) }));
-  renderArticles();
-});
+function buildDesc(idx) {
+  const cat    = val(`cat-${idx}`);
+  const mat    = val(`mat-${idx}`);
+  const titre  = val(`titre-${idx}`);
+  const carr   = val(`carr-${idx}`);
+  const ptrine = val(`ptrine-${idx}`);
+  const long   = val(`long-${idx}`);
+  const manche = val(`manche-${idx}`);
 
-document.getElementById('clearBtn').addEventListener('click', () => {
-  document.getElementById('linksInput').value = '';
-  document.getElementById('articlesSection').classList.add('hidden');
-  articles = [];
-});
+  const activeSizes = SIZES.filter(s => articles[idx].sizes.has(s));
+  const tailles = activeSizes.length ? activeSizes.join(', ') : '';
 
-function renderArticles() {
-  const list = document.getElementById('articlesList');
-  list.innerHTML = articles.map((a, i) => buildCard(a, i)).join('');
-  document.getElementById('articlesSection').classList.remove('hidden');
-  document.getElementById('copyPreview').classList.add('hidden');
-  document.getElementById('articlesSection').scrollIntoView({ behavior: 'smooth' });
-  bindSizeButtons();
+  let desc = '';
+  if (titre) desc += `${titre}\n\n`;
+  if (mat)   desc += `Composition : ${mat}\n`;
+  if (tailles) desc += `Tailles disponibles : ${tailles}\n`;
+
+  const mesures = [];
+  if (carr)   mesures.push(`Carrure ${carr} cm`);
+  if (ptrine) mesures.push(`Tour de poitrine ${ptrine} cm`);
+  if (long)   mesures.push(`Longueur ${long} cm`);
+  if (manche) mesures.push(`Longueur des manches ${manche} cm`);
+  if (mesures.length) desc += `\nMesures : ${mesures.join(' · ')}\n`;
+
+  desc += '\nPortée une seule fois, aucun défaut.';
+
+  const tags = ['#vinted'];
+  if (cat) tags.push(`#${cat.toLowerCase().replace(/\s+/g, '')}`);
+  if (tailles) activeSizes.forEach(s => tags.push(`#${s.toLowerCase()}`));
+  tags.push('#mode', '#femme', '#tendance', '#secondemain');
+  desc += '\n\n' + tags.join(' ');
+
+  return desc.trim();
+}
+
+function val(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
 }
 
 function buildCard(a, i) {
   const sizeBtns = SIZES.map(s =>
-    `<button class="size-btn" data-idx="${i}" data-size="${s}">${s}</button>`
+    `<button class="sz" data-idx="${i}" data-size="${s}">${s}</button>`
   ).join('');
 
   return `
-    <div class="article-card" id="article-${i}" style="margin-bottom:1rem">
-      <div class="article-top">
-        <span class="article-num">Article ${i + 1}</span>
-        <span class="article-link">${shorten(a.url)}</span>
-        <button class="btn-outline" onclick="copyArticle(${i})">Copier</button>
+  <div class="article-card" id="article-${i}">
+    <div class="card-num">${i + 1}</div>
+
+    <div class="card-prices">
+      <div>
+        <input class="field-input prix-shein-input" id="prix-shein-${i}" type="number" placeholder="Prix Shein (€)" step="0.01" min="0" oninput="updateTotals()">
       </div>
-      <div class="fields-grid">
-        <div class="field-group">
-          <label>SKU / Référence</label>
-          <input type="text" id="sku-${i}" placeholder="ex: SW2024-001">
-        </div>
-        <div class="field-group">
-          <label>Prix de vente (€)</label>
-          <input type="number" id="prix-${i}" placeholder="ex: 15.99" step="0.01" min="0">
-        </div>
-        <div class="field-group">
-          <label>Tour de poitrine (cm)</label>
-          <input type="text" id="poitrine-${i}" placeholder="ex: 88-96">
-        </div>
-        <div class="field-group">
-          <label>Tour de taille (cm)</label>
-          <input type="text" id="taille-${i}" placeholder="ex: 68-76">
-        </div>
-        <div class="field-group">
-          <label>Longueur (cm)</label>
-          <input type="text" id="longueur-${i}" placeholder="ex: 65">
+      <div class="resale-badge">
+        <span class="resale-label">RESALE PRICE</span>
+        <div class="resale-input-wrap">
+          <input type="number" id="prix-vente-${i}" placeholder="0" step="0.01" min="0" oninput="updateTotals()">
+          <span>€</span>
         </div>
       </div>
-      <div class="sizes-section">
-        <div class="sizes-top">
-          <span class="sizes-title">Tailles disponibles (décochez les indisponibles)</span>
-          <div class="sizes-actions">
-            <button class="btn-outline" onclick="selectAll(${i})">Tout</button>
-            <button class="btn-outline" onclick="clearAll(${i})">Aucun</button>
+    </div>
+
+    <a class="shein-link-btn" href="${a.url}" target="_blank">🔗 Voir sur Shein ↗</a>
+
+    <div class="card-fields">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+        <div class="field-row">
+          <div class="field-header"><span class="field-label">Catégorie</span></div>
+          <input class="field-input" id="cat-${i}" placeholder="ex: Cardigan" oninput="refreshDesc(${i})">
+        </div>
+        <div class="field-row">
+          <div class="field-header"><span class="field-label">Matière</span></div>
+          <input class="field-input" id="mat-${i}" placeholder="ex: 100% Viscose" oninput="refreshDesc(${i})">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-header">
+          <span class="field-label">SKU</span>
+          <button class="copy-btn" onclick="copyField('sku-${i}')">Copy</button>
+        </div>
+        <input class="field-input" id="sku-${i}" placeholder="ex: sz25021530047139165">
+      </div>
+
+      <div class="field-row">
+        <div class="field-header">
+          <span class="field-label">Titre annonce</span>
+          <button class="copy-btn" onclick="copyField('titre-${i}')">Copy</button>
+        </div>
+        <input class="field-input" id="titre-${i}" placeholder="ex: S cardigan tricoté léger portée 1x aucun défaut" oninput="refreshDesc(${i})">
+      </div>
+
+      <div class="sizes-row">
+        <div class="field-header">
+          <span class="field-label">Tailles disponibles</span>
+          <div style="display:flex;gap:.4rem">
+            <button class="copy-btn" onclick="selectAllSizes(${i})">Tout</button>
+            <button class="copy-btn" onclick="clearAllSizes(${i})">Aucun</button>
           </div>
         </div>
         <div class="sizes-btns" id="sizes-${i}">${sizeBtns}</div>
       </div>
+
+      <div>
+        <div class="field-header" style="margin-bottom:.4rem">
+          <span class="field-label">Mesures</span>
+        </div>
+        <div class="mesures-grid">
+          <div class="mesure-block">
+            <span class="mesure-label">Carrure (cm)</span>
+            <input class="mesure-input" id="carr-${i}" placeholder="ex: 50" oninput="refreshDesc(${i})">
+          </div>
+          <div class="mesure-block">
+            <span class="mesure-label">Tour poitrine (cm)</span>
+            <input class="mesure-input" id="ptrine-${i}" placeholder="ex: 100" oninput="refreshDesc(${i})">
+          </div>
+          <div class="mesure-block">
+            <span class="mesure-label">Longueur (cm)</span>
+            <input class="mesure-input" id="long-${i}" placeholder="ex: 70" oninput="refreshDesc(${i})">
+          </div>
+          <div class="mesure-block">
+            <span class="mesure-label">Manches (cm)</span>
+            <input class="mesure-input" id="manche-${i}" placeholder="ex: 25" oninput="refreshDesc(${i})">
+          </div>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field-header">
+          <span class="field-label">Description</span>
+          <button class="copy-btn" onclick="copyField('desc-${i}')">Copy</button>
+        </div>
+        <textarea class="field-input" id="desc-${i}" placeholder="Remplissez les champs ci-dessus pour générer la description..."></textarea>
+      </div>
+
     </div>
-  `;
+  </div>`;
 }
 
-function bindSizeButtons() {
-  document.querySelectorAll('.size-btn').forEach(btn => {
+function refreshDesc(i) {
+  const el = document.getElementById(`desc-${i}`);
+  if (el) el.value = buildDesc(i);
+}
+
+function copyField(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.value).then(() => toast('Copié !'));
+}
+
+function selectAllSizes(i) {
+  articles[i].sizes = new Set(SIZES);
+  document.querySelectorAll(`#sizes-${i} .sz`).forEach(b => b.classList.remove('off'));
+  refreshDesc(i);
+}
+
+function clearAllSizes(i) {
+  articles[i].sizes.clear();
+  document.querySelectorAll(`#sizes-${i} .sz`).forEach(b => b.classList.add('off'));
+  refreshDesc(i);
+}
+
+function updateTotals() {
+  let achat = 0, revente = 0;
+  articles.forEach((_, i) => {
+    achat   += parseFloat(document.getElementById(`prix-shein-${i}`)?.value || 0);
+    revente += parseFloat(document.getElementById(`prix-vente-${i}`)?.value || 0);
+  });
+  const benef = revente - achat;
+  document.getElementById('totalAchat').textContent   = fmt(achat);
+  document.getElementById('totalRevente').textContent = fmt(revente);
+  const b = document.getElementById('totalBenef');
+  b.textContent = fmt(benef);
+  b.className = 'total-val ' + (benef >= 0 ? 'green' : 'red');
+}
+
+function fmt(n) {
+  return n.toFixed(2).replace('.', ',') + ' €';
+}
+
+function bindSizes() {
+  document.querySelectorAll('.sz').forEach(btn => {
     btn.addEventListener('click', () => {
       const i = parseInt(btn.dataset.idx);
       const s = btn.dataset.size;
@@ -98,80 +209,39 @@ function bindSizeButtons() {
         articles[i].sizes.add(s);
         btn.classList.remove('off');
       }
+      refreshDesc(i);
     });
   });
 }
 
-function selectAll(i) {
-  articles[i].sizes = new Set(SIZES);
-  document.querySelectorAll(`#sizes-${i} .size-btn`).forEach(b => b.classList.remove('off'));
-}
-
-function clearAll(i) {
-  articles[i].sizes.clear();
-  document.querySelectorAll(`#sizes-${i} .size-btn`).forEach(b => b.classList.add('off'));
-}
-
-function getData(i) {
-  const a = articles[i];
-  return {
-    url:      a.url,
-    sku:      document.getElementById(`sku-${i}`).value.trim(),
-    prix:     document.getElementById(`prix-${i}`).value.trim(),
-    poitrine: document.getElementById(`poitrine-${i}`).value.trim(),
-    taille:   document.getElementById(`taille-${i}`).value.trim(),
-    longueur: document.getElementById(`longueur-${i}`).value.trim(),
-    sizes:    SIZES.filter(s => a.sizes.has(s)),
-  };
-}
-
-function formatArticle(d, num) {
-  const lines = [`── Article ${num} ──`];
-  if (d.sku)      lines.push(`SKU        : ${d.sku}`);
-  if (d.prix)     lines.push(`Prix       : ${d.prix} €`);
-  if (d.poitrine) lines.push(`Poitrine   : ${d.poitrine} cm`);
-  if (d.taille)   lines.push(`Taille     : ${d.taille} cm`);
-  if (d.longueur) lines.push(`Longueur   : ${d.longueur} cm`);
-  lines.push('');
-  d.sizes.forEach(s => lines.push(`  ${s.padEnd(4)} → ${d.url}`));
-  return lines.join('\n');
-}
-
-function copyArticle(i) {
-  const d = getData(i);
-  navigator.clipboard.writeText(formatArticle(d, i + 1)).then(() => toast('Article copié !'));
-}
-
-document.getElementById('copyAllBtn').addEventListener('click', () => {
-  if (!articles.length) return;
-  const text = articles.map((_, i) => formatArticle(getData(i), i + 1)).join('\n\n');
-  navigator.clipboard.writeText(text).then(() => toast('Tout copié !'));
-  const preview = document.getElementById('copyPreview');
-  preview.textContent = text;
-  preview.classList.remove('hidden');
+document.getElementById('generateBtn').addEventListener('click', () => {
+  const links = parseLinks(document.getElementById('linksInput').value);
+  if (!links.length) { toast('Aucun lien valide.'); return; }
+  articles = links.map(url => ({ url, sizes: new Set(SIZES) }));
+  document.getElementById('cardsList').innerHTML = articles.map((a, i) => buildCard(a, i)).join('');
+  document.getElementById('inputScreen').classList.add('hidden');
+  document.getElementById('mainScreen').classList.remove('hidden');
+  bindSizes();
+  updateTotals();
 });
 
-document.getElementById('exportBtn').addEventListener('click', () => {
-  if (!articles.length) return;
-  const rows = [['Article', 'SKU', 'Prix (€)', 'Poitrine (cm)', 'Taille (cm)', 'Longueur (cm)', 'Taille vêtement', 'Lien']];
-  articles.forEach((_, i) => {
-    const d = getData(i);
-    d.sizes.forEach(s => rows.push([i + 1, d.sku, d.prix, d.poitrine, d.taille, d.longueur, s, d.url]));
-  });
-  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
-  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `shein-vinted-${Date.now()}.csv`;
-  a.click();
-  toast('CSV exporté !');
+document.getElementById('backBtn').addEventListener('click', () => {
+  document.getElementById('inputScreen').classList.remove('hidden');
+  document.getElementById('mainScreen').classList.add('hidden');
+  articles = [];
 });
 
 function toast(msg) {
-  const t = document.getElementById('toast');
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_toast';
+    t.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#e91e8c;color:#fff;padding:.55rem 1.3rem;border-radius:50px;font-size:.85rem;font-weight:700;z-index:999;pointer-events:none;transition:transform .25s';
+    document.body.appendChild(t);
+  }
   t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2300);
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => t.style.transform = 'translateX(-50%) translateY(80px)', 2000);
 }
 
 document.getElementById('linksInput').addEventListener('keydown', e => {
