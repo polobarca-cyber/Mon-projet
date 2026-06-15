@@ -3,57 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shein → Vinted Manager</title>
+  <title>Shein → Vinted</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <header>
-    <div class="header-inner">
-      <div class="logo">Shein → Vinted</div>
-      <span class="tagline-header">Gestionnaire de liens produits</span>
-    </div>
+    <div class="logo">Shein → Vinted</div>
   </header>
 
   <main>
-    <!-- ÉTAPE 1 : coller les liens -->
-    <section class="input-section">
-      <div class="step-badge">Étape 1</div>
+    <div class="card">
       <h2>Collez vos liens Shein</h2>
-      <p class="hint">Un lien par ligne. Vous pourrez ensuite choisir les tailles disponibles pour chaque article.</p>
-      <textarea id="linksInput" placeholder="https://fr.shein.com/...&#10;https://fr.shein.com/...&#10;https://fr.shein.com/..."></textarea>
+      <p class="hint">Un lien par ligne — les tailles XS→XXL sont générées automatiquement.</p>
+      <textarea id="linksInput" placeholder="https://fr.shein.com/...&#10;https://fr.shein.com/..."></textarea>
       <div class="btn-row">
-        <button id="analyzeBtn" class="btn-primary">Charger les articles</button>
-        <button id="clearBtn" class="btn-secondary">Tout effacer</button>
+        <button id="generateBtn" class="btn-primary">Générer</button>
+        <button id="clearBtn" class="btn-secondary">Effacer</button>
       </div>
-    </section>
+    </div>
 
-    <!-- ÉTAPE 2 : sélectionner les tailles -->
-    <section id="step2" class="hidden">
-      <div class="step-badge">Étape 2</div>
-      <h2>Sélectionnez les tailles disponibles</h2>
-      <p class="hint">Cliquez sur les tailles disponibles pour chaque article (rose = disponible).</p>
-      <div id="productList" class="product-list"></div>
-      <div class="btn-row" style="margin-top:1.5rem">
-        <button id="generateBtn" class="btn-primary">Générer les liens par taille</button>
-      </div>
-    </section>
-
-    <!-- ÉTAPE 3 : résultat -->
-    <section id="step3" class="hidden">
-      <div class="step-badge">Étape 3</div>
-      <h2>Liens prêts à envoyer</h2>
-      <p class="hint">Chaque taille a son propre lien. Copiez tout et envoyez à vos employés.</p>
-      <div class="output-toolbar">
+    <div id="result" class="hidden">
+      <div class="result-toolbar">
         <button id="copyAllBtn" class="btn-primary">Tout copier</button>
-        <button id="exportBtn" class="btn-export">Exporter CSV</button>
+        <button id="exportBtn" class="btn-dark">Exporter CSV</button>
       </div>
-      <div id="outputArea" class="output-area"></div>
-    </section>
+      <div id="resultContent"></div>
+    </div>
   </main>
 
   <div class="toast" id="toast"></div>
-
   <script src="app.js"></script>
 </body>
 </html>
