@@ -16,36 +16,43 @@
   </header>
 
   <main>
+    <!-- ÉTAPE 1 : coller les liens -->
     <section class="input-section">
-      <h2>Coller vos liens Shein</h2>
-      <p class="hint">Un lien par ligne. Toutes les tailles seront listées automatiquement.</p>
+      <div class="step-badge">Étape 1</div>
+      <h2>Collez vos liens Shein</h2>
+      <p class="hint">Un lien par ligne. Vous pourrez ensuite choisir les tailles disponibles pour chaque article.</p>
       <textarea id="linksInput" placeholder="https://fr.shein.com/...&#10;https://fr.shein.com/...&#10;https://fr.shein.com/..."></textarea>
       <div class="btn-row">
-        <button id="analyzeBtn" class="btn-primary">Analyser les liens</button>
+        <button id="analyzeBtn" class="btn-primary">Charger les articles</button>
         <button id="clearBtn" class="btn-secondary">Tout effacer</button>
       </div>
     </section>
 
-    <section id="resultsSection" class="results-section hidden">
-      <div class="results-header">
-        <h2>Produits (<span id="productCount">0</span>)</h2>
-        <div class="actions-row">
-          <button id="exportBtn" class="btn-export">Exporter CSV</button>
-          <button id="copyAllBtn" class="btn-export">Copier tous les liens</button>
-        </div>
+    <!-- ÉTAPE 2 : sélectionner les tailles -->
+    <section id="step2" class="hidden">
+      <div class="step-badge">Étape 2</div>
+      <h2>Sélectionnez les tailles disponibles</h2>
+      <p class="hint">Cliquez sur les tailles disponibles pour chaque article (rose = disponible).</p>
+      <div id="productList" class="product-list"></div>
+      <div class="btn-row" style="margin-top:1.5rem">
+        <button id="generateBtn" class="btn-primary">Générer les liens par taille</button>
       </div>
-      <div id="productGrid" class="product-grid"></div>
+    </section>
+
+    <!-- ÉTAPE 3 : résultat -->
+    <section id="step3" class="hidden">
+      <div class="step-badge">Étape 3</div>
+      <h2>Liens prêts à envoyer</h2>
+      <p class="hint">Chaque taille a son propre lien. Copiez tout et envoyez à vos employés.</p>
+      <div class="output-toolbar">
+        <button id="copyAllBtn" class="btn-primary">Tout copier</button>
+        <button id="exportBtn" class="btn-export">Exporter CSV</button>
+      </div>
+      <div id="outputArea" class="output-area"></div>
     </section>
   </main>
 
-  <!-- Modal détail produit -->
-  <div id="modal" class="modal hidden">
-    <div class="modal-overlay" id="modalOverlay"></div>
-    <div class="modal-box">
-      <button class="modal-close" id="modalClose">&times;</button>
-      <div id="modalContent"></div>
-    </div>
-  </div>
+  <div class="toast" id="toast"></div>
 
   <script src="app.js"></script>
 </body>
