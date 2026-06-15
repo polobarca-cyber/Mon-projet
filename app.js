@@ -17,16 +17,21 @@ function shorten(url) {
   } catch { return url.slice(0, 45); }
 }
 
+function typeLabel(idx) {
+  const t = val(`type-${idx}`);
+  return t === 'top' ? 'Top' : t === 'robe-courte' ? 'Robe courte' : t === 'robe-longue' ? 'Robe longue' : '';
+}
+
 function buildTitre(idx, size) {
   const titre = val(`titre-${idx}`);
-  const cat   = val(`cat-${idx}`);
+  const cat   = val(`cat-${idx}`) || typeLabel(idx);
   const base  = titre || cat || '';
   if (!base) return size ? `Taille ${size}` : '';
   return size ? `Taille ${size} - ${base}` : base;
 }
 
 function buildDesc(idx, size) {
-  const cat    = val(`cat-${idx}`);
+  const cat    = val(`cat-${idx}`) || typeLabel(idx);
   const mat    = val(`mat-${idx}`);
   const titre  = val(`titre-${idx}`);
   const carr   = val(`carr-${idx}`);
@@ -112,7 +117,7 @@ function buildCard(a, i) {
     <div class="card-num">${i + 1}</div>
     <div class="card-prices">
       <div>
-        <input class="field-input prix-shein-input" id="prix-shein-${i}" type="number" placeholder="Prix Shein (€)" step="0.01" min="0" oninput="updateTotals()">
+        <input class="field-input prix-shein-input" id="prix-shein-${i}" type="number" placeholder="Prix Shein (€)" step="0.01" min="0" oninput="autoPrice(${i}); updateTotals()">
       </div>
       <div class="resale-badge">
         <span class="resale-label">RESALE PRICE</span>
@@ -126,13 +131,23 @@ function buildCard(a, i) {
     <div class="card-fields">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
         <div class="field-row">
-          <div class="field-header"><span class="field-label">Catégorie</span></div>
-          <input class="field-input" id="cat-${i}" placeholder="ex: Cardigan" oninput="refreshDesc(${i})">
+          <div class="field-header"><span class="field-label">Type d'article</span></div>
+          <select class="field-input" id="type-${i}" onchange="autoPrice(${i}); refreshDesc(${i})">
+            <option value="">— Choisir —</option>
+            <option value="top">Top / Haut</option>
+            <option value="robe-courte">Robe courte</option>
+            <option value="robe-longue">Robe longue</option>
+            <option value="autre">Autre</option>
+          </select>
         </div>
         <div class="field-row">
           <div class="field-header"><span class="field-label">Matière</span></div>
           <input class="field-input" id="mat-${i}" placeholder="ex: 100% Viscose" oninput="refreshDesc(${i})">
         </div>
+      </div>
+      <div class="field-row">
+        <div class="field-header"><span class="field-label">Catégorie (description)</span></div>
+        <input class="field-input" id="cat-${i}" placeholder="ex: Cardigan, Robe fleurie..." oninput="refreshDesc(${i})">
       </div>
       <div class="field-row">
         <div class="field-header">
@@ -222,6 +237,30 @@ function clearAllSizes(i) {
   refreshDesc(i);
 }
 
+function autoPrice(i) {
+  const type    = document.getElementById(`type-${i}`)?.value;
+  const prixEl  = document.getElementById(`prix-shein-${i}`);
+  const venteEl = document.getElementById(`prix-vente-${i}`);
+  if (!type || !prixEl || !venteEl) return;
+  const achat = parseFloat(prixEl.value);
+  if (isNaN(achat)) return;
+
+  let suggestion = null;
+  if (type === 'top') {
+    if (achat >= 5 && achat <= 9) suggestion = 29;
+  } else if (type === 'robe-courte') {
+    if (achat >= 7 && achat <= 11) suggestion = 38;
+  } else if (type === 'robe-longue') {
+    if (achat >= 7 && achat <= 10) suggestion = 49;
+    else if (achat > 10) suggestion = 54;
+  }
+
+  if (suggestion !== null) {
+    venteEl.value = suggestion;
+    updateTotals();
+  }
+}
+
 function updateTotals() {
   let achat = 0, revente = 0;
   articles.forEach((_, i) => {
@@ -267,7 +306,7 @@ function saveArticle(i) {
     url:        articles[i].url,
     articleNum: i + 1,
     titre:      val(`titre-${i}`),
-    cat:        val(`cat-${i}`),
+    cat:        val(`cat-${i}`) || typeLabel(i),
     mat:        val(`mat-${i}`),
     sku:        val(`sku-${i}`),
     prixAchat:  val(`prix-shein-${i}`),
