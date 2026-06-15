@@ -483,6 +483,44 @@ textarea.field-input {
   word-break: break-word;
 }
 
+/* SIZE CATEGORIES */
+.size-category {
+  margin-bottom: 1.2rem;
+}
+
+.size-cat-header {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin-bottom: .6rem;
+  padding: .5rem .8rem;
+  background: rgba(41,121,255,.08);
+  border: 1px solid rgba(41,121,255,.2);
+  border-radius: 8px;
+}
+
+.size-cat-badge {
+  font-size: .85rem;
+  font-weight: 900;
+  background: var(--pink);
+  color: #fff;
+  padding: .2rem .65rem;
+  border-radius: 6px;
+  letter-spacing: .05em;
+}
+
+.size-cat-count {
+  font-size: .78rem;
+  color: var(--muted);
+  flex: 1;
+}
+
+.size-cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
 .hidden { display: none !important; }
 
 @media (max-width: 500px) {
