@@ -1,226 +1,204 @@
-const STANDARD_SIZES = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL'];
-const NUMERIC_SIZES  = ['34', '36', '38', '40', '42', '44', '46', '48'];
-const KIDS_SIZES     = ['2T', '3T', '4T', '5T', '6T', '7T', '8T', '9T', '10T', '11T', '12T', '13T', '14T'];
-const SHOE_SIZES     = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
+const SIZE_CATEGORIES = {
+  'Vêtements':  ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL'],
+  'Pantalons':  ['34', '36', '38', '40', '42', '44', '46', '48'],
+  'Chaussures': ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'],
+  'Enfants':    ['2T', '3T', '4T', '5T', '6T', '7T', '8T', '9T', '10T', '11T', '12T'],
+};
 
-const products = [];
+const DEFAULT_CAT = 'Vêtements';
 
-function extractProductId(url) {
-  const patterns = [
-    /[?&]goods_id=(\d+)/,
-    /-p-(\d+)-/,
-    /\/p\/(\d+)/,
-    /goods\/(\d+)/,
-    /-(\d{6,})\./,
-  ];
-  for (const p of patterns) {
-    const m = url.match(p);
-    if (m) return m[1];
-  }
-  return null;
-}
-
-function guessSizeCategory(url) {
-  const u = url.toLowerCase();
-  if (u.includes('shoe') || u.includes('chaussure') || u.includes('sandal') ||
-      u.includes('boot') || u.includes('sneaker') || u.includes('heel')) {
-    return SHOE_SIZES;
-  }
-  if (u.includes('kid') || u.includes('enfant') || u.includes('bebe') ||
-      u.includes('baby') || u.includes('girl') || u.includes('boy')) {
-    return KIDS_SIZES;
-  }
-  if (u.includes('pants') || u.includes('jean') || u.includes('trouser') ||
-      u.includes('pantalon') || u.includes('short')) {
-    return NUMERIC_SIZES;
-  }
-  return STANDARD_SIZES;
-}
+let products = [];
+let outputRows = [];
 
 function parseLinks(raw) {
   return raw
     .split('\n')
     .map(l => l.trim())
-    .filter(l => l.length > 0 && (l.startsWith('http') || l.startsWith('www.')))
+    .filter(l => l.startsWith('http') || l.startsWith('www.'))
     .map(l => l.startsWith('www.') ? 'https://' + l : l);
-}
-
-function renderCard(product, index) {
-  const sizes = product.sizes;
-  const sizeTags = sizes.map(s =>
-    `<span class="size-tag" data-size="${s}" data-idx="${index}">${s}</span>`
-  ).join('');
-
-  return `
-    <div class="product-card" data-idx="${index}" onclick="openModal(${index})">
-      <div class="product-card-header">
-        <span class="product-num">Produit ${index + 1}</span>
-        ${product.id ? `<span class="product-id">ID: ${product.id}</span>` : ''}
-      </div>
-      <a class="product-link" href="${product.url}" target="_blank" onclick="event.stopPropagation()">${shortenUrl(product.url)}</a>
-      <div class="sizes-label">Tailles disponibles</div>
-      <div class="sizes-grid">${sizeTags}</div>
-      <div class="product-footer">
-        <button class="copy-btn" onclick="event.stopPropagation(); copyLink(${index})">Copier lien</button>
-        <a class="open-link-btn" href="${product.url}" target="_blank" onclick="event.stopPropagation()">Ouvrir Shein</a>
-      </div>
-    </div>
-  `;
 }
 
 function shortenUrl(url) {
   try {
     const u = new URL(url);
-    const path = u.pathname.slice(0, 50);
-    return u.hostname + (path.length < u.pathname.length ? path + '…' : path);
-  } catch {
-    return url.slice(0, 60) + (url.length > 60 ? '…' : '');
-  }
+    const p = u.pathname.slice(0, 45);
+    return u.hostname + (p.length < u.pathname.length ? p + '…' : p);
+  } catch { return url.slice(0, 55); }
 }
 
-function analyze() {
-  const raw = document.getElementById('linksInput').value;
-  const links = parseLinks(raw);
+document.getElementById('analyzeBtn').addEventListener('click', () => {
+  const links = parseLinks(document.getElementById('linksInput').value);
+  if (!links.length) { showToast('Aucun lien valide trouvé.'); return; }
+  products = links.map(url => ({ url, selectedSizes: new Set(), currentCat: DEFAULT_CAT }));
+  renderStep2();
+});
 
-  if (links.length === 0) {
-    showToast('Aucun lien valide trouvé. Collez des URLs Shein.');
-    return;
-  }
+document.getElementById('clearBtn').addEventListener('click', () => {
+  document.getElementById('linksInput').value = '';
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step3').classList.add('hidden');
+  products = [];
+});
 
-  products.length = 0;
-
-  links.forEach(url => {
-    const id = extractProductId(url);
-    const sizes = guessSizeCategory(url);
-    products.push({ url, id, sizes, selectedSizes: [] });
-  });
-
-  renderResults();
+function renderStep2() {
+  const list = document.getElementById('productList');
+  list.innerHTML = products.map((p, i) => buildProductItem(p, i)).join('');
+  document.getElementById('step2').classList.remove('hidden');
+  document.getElementById('step3').classList.add('hidden');
+  document.getElementById('step2').scrollIntoView({ behavior: 'smooth' });
 }
 
-function renderResults() {
-  const section = document.getElementById('resultsSection');
-  const grid    = document.getElementById('productGrid');
-  const count   = document.getElementById('productCount');
-
-  count.textContent = products.length;
-  grid.innerHTML = products.map((p, i) => renderCard(p, i)).join('');
-  section.classList.remove('hidden');
-
-  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function openModal(idx) {
-  const p = products[idx];
-  const modal = document.getElementById('modal');
-  const content = document.getElementById('modalContent');
-
-  const sizeTags = p.sizes.map(s => {
-    const sel = p.selectedSizes.includes(s) ? 'selected' : '';
-    return `<span class="modal-size-tag ${sel}" data-size="${s}" data-idx="${idx}">${s}</span>`;
+function buildProductItem(p, i) {
+  const catBtns = Object.keys(SIZE_CATEGORIES).map(cat => {
+    const active = cat === p.currentCat ? 'active' : '';
+    return `<button class="size-type-btn ${active}" onclick="changeCategory(${i},'${cat}')">${cat}</button>`;
   }).join('');
 
-  content.innerHTML = `
-    <div class="modal-title">Produit ${idx + 1}</div>
-    <div class="modal-url">${p.url}</div>
-    <div class="modal-sizes-title">Toutes les tailles</div>
-    <div class="modal-sizes" id="modalSizes">${sizeTags}</div>
-    <div class="modal-copy-row">
-      <button class="modal-copy-btn" onclick="copyLink(${idx})">Copier le lien</button>
-      <a class="modal-open-btn" href="${p.url}" target="_blank">Ouvrir sur Shein</a>
+  const sizes = SIZE_CATEGORIES[p.currentCat];
+  const sizeBtns = sizes.map(s => {
+    const on = p.selectedSizes.has(s) ? 'on' : '';
+    return `<button class="size-btn ${on}" onclick="toggleSize(${i},'${s}')">${s}</button>`;
+  }).join('');
+
+  return `
+    <div class="product-item" id="product-${i}">
+      <div class="product-item-header">
+        <span class="product-num-badge">Article ${i + 1}</span>
+        <span class="product-url-label">${shortenUrl(p.url)}</span>
+      </div>
+      <div class="size-type-row">${catBtns}</div>
+      <div class="sizes-label">Tailles disponibles — cliquez pour activer</div>
+      <div class="sizes-toggle" id="sizes-${i}">${sizeBtns}</div>
+      <div class="select-row">
+        <button class="select-all-btn" onclick="selectAll(${i})">Tout sélectionner</button>
+        <button class="clear-all-btn" onclick="clearAll(${i})">Tout désélectionner</button>
+      </div>
     </div>
   `;
-
-  content.querySelectorAll('.modal-size-tag').forEach(el => {
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const size = el.dataset.size;
-      const i = parseInt(el.dataset.idx);
-      toggleSize(i, size, el);
-    });
-  });
-
-  modal.classList.remove('hidden');
 }
 
-function toggleSize(idx, size, el) {
+function redrawSizes(idx) {
   const p = products[idx];
-  const pos = p.selectedSizes.indexOf(size);
-  if (pos === -1) {
-    p.selectedSizes.push(size);
-    el.classList.add('selected');
-  } else {
-    p.selectedSizes.splice(pos, 1);
-    el.classList.remove('selected');
-  }
+  const sizes = SIZE_CATEGORIES[p.currentCat];
+  const container = document.getElementById(`sizes-${idx}`);
+  container.innerHTML = sizes.map(s => {
+    const on = p.selectedSizes.has(s) ? 'on' : '';
+    return `<button class="size-btn ${on}" onclick="toggleSize(${idx},'${s}')">${s}</button>`;
+  }).join('');
 }
 
-function closeModal() {
-  document.getElementById('modal').classList.add('hidden');
-  renderResults();
-}
-
-document.getElementById('modalOverlay').addEventListener('click', closeModal);
-document.getElementById('modalClose').addEventListener('click', closeModal);
-
-function copyLink(idx) {
+function redrawCategories(idx) {
   const p = products[idx];
-  navigator.clipboard.writeText(p.url).then(() => {
-    showToast('Lien copié !');
-  });
+  const row = document.querySelector(`#product-${idx} .size-type-row`);
+  row.innerHTML = Object.keys(SIZE_CATEGORIES).map(cat => {
+    const active = cat === p.currentCat ? 'active' : '';
+    return `<button class="size-type-btn ${active}" onclick="changeCategory(${idx},'${cat}')">${cat}</button>`;
+  }).join('');
 }
 
-function copyAllLinks() {
-  if (products.length === 0) return;
-  const text = products.map((p, i) => `Produit ${i+1}: ${p.url}`).join('\n');
-  navigator.clipboard.writeText(text).then(() => {
-    showToast(`${products.length} liens copiés !`);
-  });
+function toggleSize(idx, size) {
+  const p = products[idx];
+  if (p.selectedSizes.has(size)) p.selectedSizes.delete(size);
+  else p.selectedSizes.add(size);
+  redrawSizes(idx);
 }
 
-function exportCSV() {
-  if (products.length === 0) return;
+function changeCategory(idx, cat) {
+  products[idx].currentCat = cat;
+  products[idx].selectedSizes.clear();
+  redrawCategories(idx);
+  redrawSizes(idx);
+}
 
-  const rows = [['Numero', 'URL', 'ID Produit', 'Toutes Tailles']];
-  products.forEach((p, i) => {
-    rows.push([
-      i + 1,
-      p.url,
-      p.id || '',
-      p.sizes.join(' | '),
-    ]);
-  });
+function selectAll(idx) {
+  const p = products[idx];
+  SIZE_CATEGORIES[p.currentCat].forEach(s => p.selectedSizes.add(s));
+  redrawSizes(idx);
+}
 
+function clearAll(idx) {
+  products[idx].selectedSizes.clear();
+  redrawSizes(idx);
+}
+
+document.getElementById('generateBtn').addEventListener('click', () => {
+  const hasAny = products.some(p => p.selectedSizes.size > 0);
+  if (!hasAny) { showToast('Sélectionnez au moins une taille.'); return; }
+
+  outputRows = [];
+  const area = document.getElementById('outputArea');
+  area.innerHTML = products.map((p, i) => {
+    if (!p.selectedSizes.size) return '';
+    const sizes = SIZE_CATEGORIES[p.currentCat].filter(s => p.selectedSizes.has(s));
+    sizes.forEach(s => outputRows.push({ size: s, url: p.url, articleNum: i + 1 }));
+
+    const rows = sizes.map(s => `
+      <div class="output-row">
+        <span class="output-size">${s}</span>
+        <span class="output-link">${shortenUrl(p.url)}</span>
+        <button class="copy-row-btn" onclick="copyText('${escJs(s)} → ${escJs(p.url)}')" >Copier</button>
+      </div>
+    `).join('');
+
+    return `
+      <div class="output-product">
+        <div class="output-product-title">
+          <span>Article ${i + 1} — ${sizes.length} taille(s)</span>
+          <button class="copy-product-btn" onclick="copyProduct(${i})">Copier cet article</button>
+        </div>
+        <div class="output-rows">${rows}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('step3').classList.remove('hidden');
+  document.getElementById('step3').scrollIntoView({ behavior: 'smooth' });
+});
+
+function copyProduct(idx) {
+  const p = products[idx];
+  const sizes = SIZE_CATEGORIES[p.currentCat].filter(s => p.selectedSizes.has(s));
+  const text = `Article ${idx + 1} :\n` + sizes.map(s => `  ${s} → ${p.url}`).join('\n');
+  copyText(text);
+}
+
+document.getElementById('copyAllBtn').addEventListener('click', () => {
+  const blocks = products.map((p, i) => {
+    if (!p.selectedSizes.size) return null;
+    const sizes = SIZE_CATEGORIES[p.currentCat].filter(s => p.selectedSizes.has(s));
+    return `Article ${i + 1} :\n` + sizes.map(s => `  ${s} → ${p.url}`).join('\n');
+  }).filter(Boolean);
+  copyText(blocks.join('\n\n'));
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  if (!outputRows.length) return;
+  const rows = [['Article', 'Taille', 'Lien Shein']];
+  outputRows.forEach(r => rows.push([r.articleNum, r.size, r.url]));
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `shein-vinted-${Date.now()}.csv`;
-  link.click();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `shein-vinted-${Date.now()}.csv`;
+  a.click();
   showToast('CSV exporté !');
+});
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => showToast('Copié !'));
+}
+
+function escJs(str) {
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
 function showToast(msg) {
-  let t = document.querySelector('.toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.className = 'toast';
-    document.body.appendChild(t);
-  }
+  const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-document.getElementById('analyzeBtn').addEventListener('click', analyze);
-document.getElementById('clearBtn').addEventListener('click', () => {
-  document.getElementById('linksInput').value = '';
-  document.getElementById('resultsSection').classList.add('hidden');
-  products.length = 0;
-});
-document.getElementById('exportBtn').addEventListener('click', exportCSV);
-document.getElementById('copyAllBtn').addEventListener('click', copyAllLinks);
-
 document.getElementById('linksInput').addEventListener('keydown', e => {
-  if (e.ctrlKey && e.key === 'Enter') analyze();
+  if (e.ctrlKey && e.key === 'Enter') document.getElementById('analyzeBtn').click();
 });
