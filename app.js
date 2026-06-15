@@ -368,13 +368,39 @@ function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+let activeTab = 0;
+
+function buildTabs() {
+  const bar = document.getElementById('tabsBar');
+  if (articles.length <= 1) { bar.classList.add('hidden'); return; }
+  bar.classList.remove('hidden');
+  bar.innerHTML = articles.map((_, i) => `
+    <button class="tab-btn${i === activeTab ? ' active' : ''}" onclick="switchTab(${i})">
+      Article ${i + 1}
+    </button>
+  `).join('');
+}
+
+function switchTab(i) {
+  activeTab = i;
+  document.querySelectorAll('.article-card').forEach((card, idx) => {
+    card.classList.toggle('hidden', idx !== i);
+  });
+  document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+    btn.classList.toggle('active', idx === i);
+  });
+}
+
 document.getElementById('generateBtn').addEventListener('click', () => {
   const links = parseLinks(document.getElementById('linksInput').value);
   if (!links.length) { toast('Aucun lien valide.'); return; }
+  activeTab = 0;
   articles = links.map(url => ({ url, sizes: new Set(SIZES) }));
   document.getElementById('cardsList').innerHTML = articles.map((a, i) => buildCard(a, i)).join('');
   document.getElementById('inputScreen').classList.add('hidden');
   document.getElementById('mainScreen').classList.remove('hidden');
+  buildTabs();
+  switchTab(0);
   bindSizes();
   updateTotals();
 });
@@ -382,7 +408,9 @@ document.getElementById('generateBtn').addEventListener('click', () => {
 document.getElementById('backBtn').addEventListener('click', () => {
   document.getElementById('inputScreen').classList.remove('hidden');
   document.getElementById('mainScreen').classList.add('hidden');
+  document.getElementById('tabsBar').classList.add('hidden');
   articles = [];
+  saved = [];
 });
 
 function toast(msg) {
