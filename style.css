@@ -311,6 +311,9 @@ header {
 }
 .field-input:focus { border-color: var(--pink); }
 
+select.field-input { cursor: pointer; }
+select.field-input option { background: #0c0c14; color: var(--light); }
+
 textarea.field-input {
   min-height: 100px;
   resize: vertical;
