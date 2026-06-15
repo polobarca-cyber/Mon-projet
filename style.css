@@ -70,6 +70,32 @@ textarea {
 }
 textarea:focus { border-color: var(--pink); }
 
+.defaults-panel {
+  margin-top: 1.2rem;
+  background: rgba(41,121,255,.06);
+  border: 1px solid rgba(41,121,255,.2);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.defaults-title {
+  font-size: .8rem;
+  font-weight: 800;
+  color: var(--pink);
+  margin-bottom: .8rem;
+  letter-spacing: .04em;
+}
+
+.defaults-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .6rem;
+}
+
+@media (max-width: 420px) {
+  .defaults-grid { grid-template-columns: 1fr; }
+}
+
 .btn-go {
   width: 100%;
   margin-top: 1rem;
