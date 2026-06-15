@@ -18,6 +18,14 @@ function shorten(url) {
 }
 
 // Génère la description pour UNE taille précise
+function buildTitre(idx, size) {
+  const titre = val(`titre-${idx}`);
+  const cat   = val(`cat-${idx}`);
+  const base  = titre || cat || '';
+  if (!base) return size ? `Taille ${size}` : '';
+  return size ? `Taille ${size} - ${base}` : base;
+}
+
 function buildDesc(idx, size) {
   const cat    = val(`cat-${idx}`);
   const mat    = val(`mat-${idx}`);
@@ -26,43 +34,66 @@ function buildDesc(idx, size) {
   const ptrine = val(`ptrine-${idx}`);
   const long   = val(`long-${idx}`);
   const manche = val(`manche-${idx}`);
-  const prix   = val(`prix-vente-${idx}`);
+  const prixV  = val(`prix-vente-${idx}`);
+  const prixA  = val(`prix-shein-${idx}`);
 
   const lines = [];
 
-  if (titre) lines.push(`✨ ${titre}${size ? ` — Taille ${size}` : ''}`);
-  else if (cat) lines.push(`✨ ${cat}${size ? ` taille ${size}` : ''}`);
+  // Titre formaté avec taille
+  const titreFmt = buildTitre(idx, size);
+  if (titreFmt) lines.push(`✨ ${titreFmt}`);
 
   lines.push('');
+  lines.push('─────────────────────────');
+  lines.push('📋 INFORMATIONS ARTICLE');
+  lines.push('─────────────────────────');
 
-  if (cat)  lines.push(`📦 Type : ${cat}`);
-  if (size) lines.push(`📏 Taille : ${size}`);
+  if (cat)  lines.push(`📦 Catégorie   : ${cat}`);
+  if (size) lines.push(`📏 Taille      : ${size}`);
   if (mat)  lines.push(`🧵 Composition : ${mat}`);
-  if (prix) lines.push(`💶 Prix : ${prix} €`);
+  if (prixV) lines.push(`💶 Prix de vente : ${prixV} €`);
+  if (prixA && prixV) {
+    const eco = (parseFloat(prixA) - parseFloat(prixV)).toFixed(2);
+    if (parseFloat(eco) > 0) lines.push(`💰 Économie vs neuf : -${eco} €`);
+  }
 
   const mesures = [];
-  if (carr)   mesures.push(`Carrure : ${carr} cm`);
+  if (carr)   mesures.push(`Carrure          : ${carr} cm`);
   if (ptrine) mesures.push(`Tour de poitrine : ${ptrine} cm`);
-  if (long)   mesures.push(`Longueur : ${long} cm`);
-  if (manche) mesures.push(`Manches : ${manche} cm`);
+  if (long)   mesures.push(`Longueur totale  : ${long} cm`);
+  if (manche) mesures.push(`Longueur manches : ${manche} cm`);
 
   if (mesures.length) {
     lines.push('');
-    lines.push('📐 Mesures :');
+    lines.push('─────────────────────────');
+    lines.push('📐 MESURES EXACTES');
+    lines.push('─────────────────────────');
     mesures.forEach(m => lines.push(`   • ${m}`));
+    lines.push('');
+    lines.push('ℹ️  Mesures prises à plat, doubler pour le tour complet.');
   }
 
   lines.push('');
-  lines.push('✅ État : Portée une seule fois, aucun défaut. Comme neuve.');
-  lines.push('🚚 Envoi rapide — paiement sécurisé via Vinted.');
-  lines.push('💬 N\'hésitez pas à me poser vos questions !');
+  lines.push('─────────────────────────');
+  lines.push('🔍 ÉTAT & LIVRAISON');
+  lines.push('─────────────────────────');
+  lines.push('✅ État : Portée une seule fois, aucun défaut visible.');
+  lines.push('🧺 Lavage : Respecté selon les instructions de l\'étiquette.');
+  lines.push('📦 Emballage : Soigneusement plié et protégé pour l\'envoi.');
+  lines.push('🚚 Envoi rapide sous 24/48h — paiement sécurisé via Vinted.');
+  lines.push('');
+  lines.push('💬 Des questions ? N\'hésitez pas à me contacter !');
+  lines.push('⭐ Vendeuse sérieuse — profil vérifié.');
 
   lines.push('');
-  const tags = ['#vinted', '#secondemain', '#mode', '#femme', '#tendance', '#bonnaffaire'];
+  lines.push('─────────────────────────');
+  const tags = ['#vinted', '#secondemain', '#mode', '#femme', '#tendance', '#bonnaffaire', '#pascher'];
   if (cat)  tags.push(`#${cat.toLowerCase().replace(/\s+/g, '')}`);
   if (size) tags.push(`#taille${size.toLowerCase()}`);
   if (mat && mat.toLowerCase().includes('viscose')) tags.push('#viscose');
   if (mat && mat.toLowerCase().includes('coton'))   tags.push('#coton');
+  if (mat && mat.toLowerCase().includes('lin'))     tags.push('#lin');
+  if (mat && mat.toLowerCase().includes('soie'))    tags.push('#soie');
   lines.push(tags.join(' '));
 
   return lines.join('\n').trim();
@@ -157,7 +188,7 @@ function buildCard(a, i) {
 
       <div class="field-row">
         <div class="field-header">
-          <span class="field-label">Aperçu description (taille S)</span>
+          <span class="field-label">Aperçu description</span>
           <button class="copy-btn" onclick="copyField('desc-${i}')">Copy</button>
         </div>
         <textarea class="field-input" id="desc-${i}" placeholder="Remplissez les champs ci-dessus..."></textarea>
@@ -253,6 +284,7 @@ function saveArticle(i) {
   activeSizes.forEach(size => {
     saved.push({
       ...base,
+      titreComplet: buildTitre(i, size),
       size,
       desc: buildDesc(i, size),
     });
@@ -300,7 +332,7 @@ function renderSaved() {
           <div class="saved-card">
             <div class="saved-header">
               <span class="saved-num">Article ${d.articleNum}</span>
-              <span class="saved-title">${d.titre || d.cat || '—'}</span>
+              <span class="saved-title">${d.titreComplet || d.titre || d.cat || '—'}</span>
               <div class="saved-actions">
                 <button class="copy-btn" onclick="copySaved(${idx})">Copier</button>
                 <button class="copy-btn del-btn" onclick="deleteSaved(${idx})">✕</button>
@@ -323,7 +355,7 @@ function copySizeCategory(size) {
   const entries = saved.filter(d => d.size === size);
   const text = entries.map((d, i) => [
     `── ${size} · Article ${d.articleNum} ──`,
-    d.titre ? `TITRE : ${d.titre} — Taille ${d.size}` : '',
+    d.titreComplet ? `TITRE : ${d.titreComplet}` : '',
     d.sku   ? `SKU   : ${d.sku}` : '',
     d.prixVente ? `PRIX  : ${d.prixVente} €` : '',
     '',
@@ -335,7 +367,7 @@ function copySizeCategory(size) {
 function copySaved(idx) {
   const d = saved[idx];
   const text = [
-    d.titre ? `TITRE : ${d.titre} — Taille ${d.size}` : `Taille ${d.size}`,
+    `TITRE : ${d.titreComplet || d.titre || d.cat || `Taille ${d.size}`}`,
     d.sku   ? `SKU   : ${d.sku}` : '',
     d.prixVente ? `PRIX  : ${d.prixVente} €` : '',
     '',
@@ -354,7 +386,7 @@ function copyAllSaved() {
   const text = SIZES.filter(s => saved.some(d => d.size === s)).map(size => {
     const entries = saved.filter(d => d.size === size);
     return `════ TAILLE ${size} ════\n\n` + entries.map(d => [
-      d.titre ? `TITRE : ${d.titre} — Taille ${d.size}` : '',
+      d.titreComplet ? `TITRE : ${d.titreComplet}` : '',
       d.sku   ? `SKU   : ${d.sku}` : '',
       d.prixVente ? `PRIX  : ${d.prixVente} €` : '',
       '',
