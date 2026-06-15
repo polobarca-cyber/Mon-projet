@@ -14,6 +14,35 @@
       <div class="input-logo">Shein → Vinted</div>
       <p class="input-sub">Collez vos liens Shein, un par ligne</p>
       <textarea id="linksInput" placeholder="https://fr.shein.com/...&#10;https://fr.shein.com/..."></textarea>
+
+      <div class="defaults-panel">
+        <div class="defaults-title">⚙️ Valeurs par défaut</div>
+        <div class="defaults-grid">
+          <div class="field-row">
+            <span class="field-label">Type d'article</span>
+            <select class="field-input" id="def-type">
+              <option value="">— Choisir —</option>
+              <option value="top">Top / Haut</option>
+              <option value="robe-courte">Robe courte</option>
+              <option value="robe-longue">Robe longue</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Prix d'achat (€)</span>
+            <input class="field-input" id="def-prix" type="number" placeholder="ex: 8" step="0.01" min="0">
+          </div>
+          <div class="field-row">
+            <span class="field-label">Matière</span>
+            <input class="field-input" id="def-mat" placeholder="ex: 100% Viscose">
+          </div>
+          <div class="field-row">
+            <span class="field-label">Catégorie</span>
+            <input class="field-input" id="def-cat" placeholder="ex: Robe fleurie">
+          </div>
+        </div>
+      </div>
+
       <button id="generateBtn" class="btn-go">Charger les articles</button>
     </div>
   </div>

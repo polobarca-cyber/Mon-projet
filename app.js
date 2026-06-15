@@ -465,9 +465,26 @@ function switchTab(i) {
 document.getElementById('generateBtn').addEventListener('click', () => {
   const links = parseLinks(document.getElementById('linksInput').value);
   if (!links.length) { toast('Aucun lien valide.'); return; }
+
+  const defType = document.getElementById('def-type')?.value || '';
+  const defPrix = document.getElementById('def-prix')?.value || '';
+  const defMat  = document.getElementById('def-mat')?.value || '';
+  const defCat  = document.getElementById('def-cat')?.value || '';
+
   activeTab = 0;
   articles = links.map(url => ({ url, sizes: new Set(SIZES) }));
   document.getElementById('cardsList').innerHTML = articles.map((a, i) => buildCard(a, i)).join('');
+
+  // Appliquer les valeurs par défaut à chaque carte
+  articles.forEach((_, i) => {
+    if (defType) { const el = document.getElementById(`type-${i}`); if (el) el.value = defType; }
+    if (defPrix) { const el = document.getElementById(`prix-shein-${i}`); if (el) el.value = defPrix; }
+    if (defMat)  { const el = document.getElementById(`mat-${i}`);  if (el) el.value = defMat; }
+    if (defCat)  { const el = document.getElementById(`cat-${i}`);  if (el) el.value = defCat; }
+    autoPrice(i);
+    refreshDesc(i);
+  });
+
   document.getElementById('inputScreen').classList.add('hidden');
   document.getElementById('mainScreen').classList.remove('hidden');
   buildTabs();
