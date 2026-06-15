@@ -15,20 +15,23 @@
   <main>
     <div class="card">
       <h2>Collez vos liens Shein</h2>
-      <p class="hint">Un lien par ligne — les tailles XS→XXL sont générées automatiquement.</p>
+      <p class="hint">Un lien par ligne.</p>
       <textarea id="linksInput" placeholder="https://fr.shein.com/...&#10;https://fr.shein.com/..."></textarea>
       <div class="btn-row">
-        <button id="generateBtn" class="btn-primary">Générer</button>
+        <button id="generateBtn" class="btn-primary">Charger les articles</button>
         <button id="clearBtn" class="btn-secondary">Effacer</button>
       </div>
     </div>
 
-    <div id="result" class="hidden">
-      <div class="result-toolbar">
-        <button id="copyAllBtn" class="btn-primary">Tout copier</button>
-        <button id="exportBtn" class="btn-dark">Exporter CSV</button>
+    <div id="articlesSection" class="hidden">
+      <div id="articlesList"></div>
+      <div class="card final-card">
+        <div class="btn-row">
+          <button id="copyAllBtn" class="btn-primary">Tout copier</button>
+          <button id="exportBtn" class="btn-dark">Exporter CSV</button>
+        </div>
+        <div id="copyPreview" class="copy-preview hidden"></div>
       </div>
-      <div id="resultContent"></div>
     </div>
   </main>
 
