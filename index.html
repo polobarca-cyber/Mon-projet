@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DropShop — Boutique dropshipping</title>
+  <title>La Trouvaille — Boutique en ligne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -11,18 +14,21 @@
   <!-- HEADER -->
   <header class="navbar">
     <div class="nav-inner">
-      <a href="#accueil" class="logo">Drop<span>Shop</span></a>
+      <a href="#accueil" class="logo">La <span>Trouvaille</span></a>
 
       <nav id="navLinks" class="nav-links">
         <a href="#accueil">Accueil</a>
-        <a href="#catalogue">Catalogue</a>
+        <a href="#catalogue">Boutique</a>
         <a href="#contact">Contact</a>
       </nav>
 
       <div class="nav-actions">
-        <input id="searchInput" class="search-input" type="text" placeholder="Rechercher un produit..." />
-        <button id="cartBtn" class="cart-btn" aria-label="Panier">
-          🛒 <span id="cartCount" class="cart-count hidden">0</span>
+        <input id="searchInput" class="search-input" type="text" placeholder="Rechercher un article..." />
+        <button id="favBtn" class="icon-round-btn" aria-label="Favoris">
+          ♡ <span id="favCount" class="count-badge hidden">0</span>
+        </button>
+        <button id="cartBtn" class="icon-round-btn" aria-label="Panier">
+          🧺 <span id="cartCount" class="count-badge hidden">0</span>
         </button>
         <button id="menuToggle" class="menu-toggle" aria-label="Menu">☰</button>
       </div>
@@ -32,24 +38,27 @@
   <!-- HERO -->
   <section id="accueil" class="hero">
     <div class="hero-content">
-      <span class="hero-badge">✨ Livraison directe depuis nos fournisseurs</span>
-      <h1>Des produits tendance, livrés chez vous</h1>
-      <p>Découvrez notre sélection soigneusement choisie d'articles high-tech, mode, maison et bien-être — au meilleur prix.</p>
-      <a href="#catalogue" class="btn-primary">Voir le catalogue</a>
+      <span class="hero-badge">✦ Une sélection qui fait plaisir</span>
+      <h1>Des trouvailles qui vous ressemblent, livrées chez vous</h1>
+      <p>Une petite boutique en ligne pensée avec soin : des objets utiles et jolis, choisis pour leur qualité et leur prix juste.</p>
+      <a href="#catalogue" class="btn-primary">Découvrir la boutique</a>
     </div>
   </section>
 
   <!-- CATALOGUE -->
   <section id="catalogue" class="catalogue">
     <div class="section-head">
-      <h2>Notre catalogue</h2>
-      <p>Ajoutez vos articles préférés au panier et commandez en quelques clics.</p>
+      <h2>La boutique</h2>
+      <p>Ajoutez vos coups de cœur au panier et commandez en quelques clics.</p>
     </div>
 
-    <div id="categoryFilters" class="category-filters"></div>
+    <div class="toolbar">
+      <div id="categoryFilters" class="category-filters"></div>
+      <button id="favFilterBtn" class="filter-chip fav-chip">♡ Mes favoris</button>
+    </div>
 
     <div id="productsGrid" class="products-grid"></div>
-    <p id="noResults" class="no-results hidden">Aucun produit ne correspond à votre recherche.</p>
+    <p id="noResults" class="no-results hidden">Aucun article ne correspond à votre recherche.</p>
   </section>
 
   <!-- POURQUOI NOUS -->
@@ -66,8 +75,8 @@
     </div>
     <div class="feature">
       <span class="feature-icon">💬</span>
-      <h3>Support réactif</h3>
-      <p>Une question ? Contactez-nous par WhatsApp ou email.</p>
+      <h3>Support à l'écoute</h3>
+      <p>Une question sur un article ? Écrivez-nous, on répond vite.</p>
     </div>
   </section>
 
@@ -84,7 +93,7 @@
   </section>
 
   <footer class="site-footer">
-    <p>© <span id="year"></span> DropShop — Tous droits réservés.</p>
+    <p>© <span id="year"></span> La Trouvaille — Tous droits réservés.</p>
   </footer>
 
   <!-- PANIER (drawer) -->

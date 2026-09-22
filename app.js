@@ -1,9 +1,9 @@
 // ==== CONFIGURATION ====
 // Remplacez ces valeurs par vos propres informations / lien de paiement.
 const CONFIG = {
-  shopName: 'DropShop',
+  shopName: 'La Trouvaille',
   whatsappNumber: '33612345678', // format international sans "+" ni espaces
-  contactEmail: 'contact@dropshop.example',
+  contactEmail: 'contact@latrouvaille.example',
   stripeLink: 'https://buy.stripe.com/VOTRE_LIEN_DE_PAIEMENT',
   currency: '€',
 };
@@ -11,49 +11,83 @@ const CONFIG = {
 // ==== CATALOGUE PRODUITS ====
 // Remplacez librement par vos propres produits (fournisseur, images, prix...).
 const PRODUCTS = [
-  { id: 'p1', name: 'Écouteurs sans fil Pro', category: 'High-Tech', price: 29.9, oldPrice: 49.9, emoji: '🎧', color: '#6C5CE7', desc: "Écouteurs Bluetooth 5.3 avec réduction de bruit active, autonomie 30h avec le boîtier de charge." },
-  { id: 'p2', name: 'Montre connectée Sport', category: 'High-Tech', price: 34.9, oldPrice: 59.9, emoji: '⌚', color: '#00B894', desc: "Suivi d'activité, fréquence cardiaque, notifications smartphone, étanche IP68." },
-  { id: 'p3', name: 'Lampe LED RGB', category: 'Maison', price: 19.9, oldPrice: null, emoji: '💡', color: '#FD79A8', desc: "Lampe d'ambiance connectée, 16 millions de couleurs, contrôle via application mobile." },
-  { id: 'p4', name: 'Organisateur de bureau', category: 'Maison', price: 15.9, oldPrice: 22.9, emoji: '🗂️', color: '#0984E3', desc: "Rangement multi-compartiments pour bureau, bambou et métal, design minimaliste." },
-  { id: 'p5', name: 'Sac banane tendance', category: 'Mode', price: 17.5, oldPrice: 27.9, emoji: '👜', color: '#E17055', desc: "Sac banane unisexe imperméable, idéal pour le sport et les sorties." },
-  { id: 'p6', name: 'Lunettes de soleil rétro', category: 'Mode', price: 12.9, oldPrice: null, emoji: '🕶️', color: '#2D3436', desc: "Monture rétro polarisée, protection UV400, plusieurs coloris disponibles." },
-  { id: 'p7', name: 'Rouleau de massage facial', category: 'Beauté', price: 9.9, oldPrice: 16.9, emoji: '💆', color: '#FAB1A0', desc: "Rouleau en pierre naturelle pour un massage relaxant et raffermissant du visage." },
-  { id: 'p8', name: 'Diffuseur d’huiles essentielles', category: 'Beauté', price: 24.9, oldPrice: 34.9, emoji: '🌿', color: '#55EFC4', desc: "Diffuseur ultrasonique silencieux avec veilleuse LED multicolore, capacité 300ml." },
-  { id: 'p9', name: 'Chargeur sans fil rapide', category: 'High-Tech', price: 14.9, oldPrice: 21.9, emoji: '🔌', color: '#74B9FF', desc: "Chargeur à induction 15W compatible avec tous les smartphones récents." },
-  { id: 'p10', name: 'Tapis de yoga antidérapant', category: 'Bien-être', price: 22.9, oldPrice: null, emoji: '🧘', color: '#A29BFE', desc: "Tapis épais 6mm, surface antidérapante, sac de transport inclus." },
-  { id: 'p11', name: 'Gourde isotherme 1L', category: 'Bien-être', price: 13.9, oldPrice: 19.9, emoji: '🥤', color: '#81ECEC', desc: "Garde vos boissons froides 24h ou chaudes 12h, acier inoxydable sans BPA." },
-  { id: 'p12', name: 'Support téléphone voiture', category: 'High-Tech', price: 11.9, oldPrice: 18.9, emoji: '📱', color: '#636E72', desc: "Fixation magnétique universelle pour grille d'aération, rotation 360°." },
+  { id: 'p1', name: 'Écouteurs sans fil Pro', category: 'High-Tech', price: 29.9, oldPrice: 49.9, rating: 4.7, reviews: 342, emoji: '🎧', color: '#6C5CE7', desc: "Écouteurs Bluetooth 5.3 avec réduction de bruit active, autonomie 30h avec le boîtier de charge." },
+  { id: 'p2', name: 'Montre connectée Sport', category: 'High-Tech', price: 34.9, oldPrice: 59.9, rating: 4.5, reviews: 210, emoji: '⌚', color: '#00B894', desc: "Suivi d'activité, fréquence cardiaque, notifications smartphone, étanche IP68." },
+  { id: 'p3', name: 'Lampe LED RGB', category: 'Maison', price: 19.9, oldPrice: null, rating: 4.8, reviews: 156, emoji: '💡', color: '#FD79A8', desc: "Lampe d'ambiance connectée, 16 millions de couleurs, contrôle via application mobile." },
+  { id: 'p4', name: 'Organisateur de bureau', category: 'Maison', price: 15.9, oldPrice: 22.9, rating: 4.3, reviews: 89, emoji: '🗂️', color: '#0984E3', desc: "Rangement multi-compartiments pour bureau, bambou et métal, design minimaliste." },
+  { id: 'p5', name: 'Sac banane tendance', category: 'Mode', price: 17.5, oldPrice: 27.9, rating: 4.6, reviews: 124, emoji: '👜', color: '#E17055', desc: "Sac banane unisexe imperméable, idéal pour le sport et les sorties." },
+  { id: 'p6', name: 'Lunettes de soleil rétro', category: 'Mode', price: 12.9, oldPrice: null, rating: 4.4, reviews: 201, emoji: '🕶️', color: '#2D3436', desc: "Monture rétro polarisée, protection UV400, plusieurs coloris disponibles." },
+  { id: 'p7', name: 'Rouleau de massage facial', category: 'Beauté', price: 9.9, oldPrice: 16.9, rating: 4.9, reviews: 178, emoji: '💆', color: '#FAB1A0', desc: "Rouleau en pierre naturelle pour un massage relaxant et raffermissant du visage." },
+  { id: 'p8', name: 'Diffuseur d’huiles essentielles', category: 'Beauté', price: 24.9, oldPrice: 34.9, rating: 4.6, reviews: 265, emoji: '🌿', color: '#55EFC4', desc: "Diffuseur ultrasonique silencieux avec veilleuse LED multicolore, capacité 300ml." },
+  { id: 'p9', name: 'Chargeur sans fil rapide', category: 'High-Tech', price: 14.9, oldPrice: 21.9, rating: 4.2, reviews: 97, emoji: '🔌', color: '#74B9FF', desc: "Chargeur à induction 15W compatible avec tous les smartphones récents." },
+  { id: 'p10', name: 'Tapis de yoga antidérapant', category: 'Bien-être', price: 22.9, oldPrice: null, rating: 4.7, reviews: 143, emoji: '🧘', color: '#A29BFE', desc: "Tapis épais 6mm, surface antidérapante, sac de transport inclus." },
+  { id: 'p11', name: 'Gourde isotherme 1L', category: 'Bien-être', price: 13.9, oldPrice: 19.9, rating: 4.5, reviews: 188, emoji: '🥤', color: '#81ECEC', desc: "Garde vos boissons froides 24h ou chaudes 12h, acier inoxydable sans BPA." },
+  { id: 'p12', name: 'Support téléphone voiture', category: 'High-Tech', price: 11.9, oldPrice: 18.9, rating: 4.3, reviews: 112, emoji: '📱', color: '#636E72', desc: "Fixation magnétique universelle pour grille d'aération, rotation 360°." },
 ];
 
 // ==== ÉTAT ====
-let cart = loadCart();
+let cart = loadFromStorage('dropshop_cart', []);
+let favorites = loadFromStorage('dropshop_favorites', []);
 let activeCategory = 'Tous';
 let searchQuery = '';
+let showFavoritesOnly = false;
 
 // ==== HELPERS ====
 function formatPrice(n) {
   return n.toFixed(2).replace('.', ',') + ' ' + CONFIG.currency;
 }
 
-function loadCart() {
+function loadFromStorage(key, fallback) {
   try {
-    const raw = localStorage.getItem('dropshop_cart');
-    return raw ? JSON.parse(raw) : [];
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
   } catch {
-    return [];
+    return fallback;
   }
 }
 
-function saveCart() {
+function saveToStorage(key, value) {
   try {
-    localStorage.setItem('dropshop_cart', JSON.stringify(cart));
+    localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // stockage indisponible : le panier reste en mémoire pour la session
+    // stockage indisponible : l'état reste en mémoire pour la session
   }
 }
 
 function getProduct(id) {
   return PRODUCTS.find(p => p.id === id);
+}
+
+function renderStars(rating, reviews) {
+  return `<span class="stars">★ ${rating.toFixed(1)}</span><span class="reviews-count">(${reviews} avis)</span>`;
+}
+
+function discountPercent(p) {
+  if (!p.oldPrice) return null;
+  return Math.round((1 - p.price / p.oldPrice) * 100);
+}
+
+// ==== FAVORIS ====
+function isFavorite(id) {
+  return favorites.includes(id);
+}
+
+function toggleFavorite(id) {
+  if (isFavorite(id)) {
+    favorites = favorites.filter(f => f !== id);
+  } else {
+    favorites.push(id);
+  }
+  saveToStorage('dropshop_favorites', favorites);
+  renderFavCount();
+  renderProducts();
+}
+
+function renderFavCount() {
+  const el = document.getElementById('favCount');
+  el.textContent = favorites.length;
+  el.classList.toggle('hidden', favorites.length === 0);
+  document.getElementById('favBtn').classList.toggle('has-favs', favorites.length > 0);
 }
 
 // ==== RENDU CATALOGUE ====
@@ -80,18 +114,23 @@ function renderProducts() {
   const filtered = PRODUCTS.filter(p => {
     const matchCat = activeCategory === 'Tous' || p.category === activeCategory;
     const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCat && matchSearch;
+    const matchFav = !showFavoritesOnly || isFavorite(p.id);
+    return matchCat && matchSearch && matchFav;
   });
 
-  grid.innerHTML = filtered.map(p => `
+  grid.innerHTML = filtered.map(p => {
+    const pct = discountPercent(p);
+    return `
     <article class="product-card" data-id="${p.id}">
       <div class="product-thumb" style="background:${p.color}22">
         <span style="font-size:48px">${p.emoji}</span>
-        ${p.oldPrice ? '<span class="badge-promo">PROMO</span>' : ''}
+        ${pct ? `<span class="badge-promo">−${pct}%</span>` : ''}
+        <button class="fav-toggle ${isFavorite(p.id) ? 'active' : ''}" data-id="${p.id}" aria-label="Ajouter aux favoris">${isFavorite(p.id) ? '♥' : '♡'}</button>
       </div>
       <div class="product-info">
         <span class="product-cat">${p.category}</span>
         <h3 class="product-name">${p.name}</h3>
+        <div class="product-rating">${renderStars(p.rating, p.reviews)}</div>
         <div class="product-price-row">
           <span class="product-price">${formatPrice(p.price)}</span>
           ${p.oldPrice ? `<span class="product-old-price">${formatPrice(p.oldPrice)}</span>` : ''}
@@ -99,7 +138,8 @@ function renderProducts() {
         <button class="btn-primary full add-to-cart" data-id="${p.id}">Ajouter au panier</button>
       </div>
     </article>
-  `).join('');
+  `;
+  }).join('');
 
   noResults.classList.toggle('hidden', filtered.length > 0);
 
@@ -113,30 +153,48 @@ function renderProducts() {
       addToCart(btn.dataset.id);
     });
   });
+
+  grid.querySelectorAll('.fav-toggle').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFavorite(btn.dataset.id);
+    });
+  });
 }
 
 // ==== MODAL PRODUIT ====
 function openProductModal(id) {
   const p = getProduct(id);
   if (!p) return;
+  const pct = discountPercent(p);
 
   document.getElementById('productModalContent').innerHTML = `
     <div class="product-modal-thumb" style="background:${p.color}22">
       <span style="font-size:96px">${p.emoji}</span>
+      ${pct ? `<span class="badge-promo">−${pct}%</span>` : ''}
     </div>
     <span class="product-cat">${p.category}</span>
     <h2>${p.name}</h2>
+    <div class="product-rating">${renderStars(p.rating, p.reviews)}</div>
     <div class="product-price-row">
       <span class="product-price">${formatPrice(p.price)}</span>
       ${p.oldPrice ? `<span class="product-old-price">${formatPrice(p.oldPrice)}</span>` : ''}
     </div>
     <p class="product-desc">${p.desc}</p>
-    <button class="btn-primary full" id="modalAddToCart" data-id="${p.id}">Ajouter au panier</button>
+    <div class="product-modal-actions">
+      <button class="btn-primary full" id="modalAddToCart" data-id="${p.id}">Ajouter au panier</button>
+      <button class="btn-secondary fav-toggle-modal ${isFavorite(p.id) ? 'active' : ''}" id="modalFavToggle" data-id="${p.id}">${isFavorite(p.id) ? '♥ Dans mes favoris' : '♡ Ajouter aux favoris'}</button>
+    </div>
   `;
 
   document.getElementById('modalAddToCart').addEventListener('click', () => {
     addToCart(p.id);
     closeModal('productModal');
+  });
+
+  document.getElementById('modalFavToggle').addEventListener('click', () => {
+    toggleFavorite(p.id);
+    openProductModal(p.id);
   });
 
   openModal('productModal');
@@ -150,7 +208,7 @@ function addToCart(id) {
   } else {
     cart.push({ id, qty: 1 });
   }
-  saveCart();
+  saveToStorage('dropshop_cart', cart);
   renderCart();
   openCart();
 }
@@ -162,13 +220,13 @@ function updateQty(id, delta) {
   if (item.qty <= 0) {
     cart = cart.filter(i => i.id !== id);
   }
-  saveCart();
+  saveToStorage('dropshop_cart', cart);
   renderCart();
 }
 
 function removeFromCart(id) {
   cart = cart.filter(i => i.id !== id);
-  saveCart();
+  saveToStorage('dropshop_cart', cart);
   renderCart();
 }
 
@@ -326,10 +384,22 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCategoryFilters();
   renderProducts();
   renderCart();
+  renderFavCount();
 
   document.getElementById('searchInput').addEventListener('input', (e) => {
     searchQuery = e.target.value;
     renderProducts();
+  });
+
+  document.getElementById('favFilterBtn').addEventListener('click', (e) => {
+    showFavoritesOnly = !showFavoritesOnly;
+    e.currentTarget.classList.toggle('active', showFavoritesOnly);
+    renderProducts();
+  });
+
+  document.getElementById('favBtn').addEventListener('click', () => {
+    document.getElementById('favFilterBtn').click();
+    document.getElementById('catalogue').scrollIntoView({ behavior: 'smooth' });
   });
 
   document.getElementById('cartBtn').addEventListener('click', openCart);
