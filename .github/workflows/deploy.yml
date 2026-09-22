@@ -3,7 +3,7 @@ name: Deploy sur GitHub Pages
 on:
   push:
     branches:
-      - claude/upbeat-lovelace-qt7x4h
+      - claude/achat-revente-website-iklxv0
 
 permissions:
   contents: read

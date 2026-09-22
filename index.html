@@ -3,88 +3,152 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shein → Vinted</title>
+  <title>DropShop — Boutique dropshipping</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- SAISIE LIENS -->
-  <div id="inputScreen" class="input-screen">
-    <div class="input-box">
-      <div class="input-logo">Shein → Vinted</div>
-      <p class="input-sub">Collez vos liens Shein, un par ligne</p>
-      <textarea id="linksInput" placeholder="https://fr.shein.com/...&#10;https://fr.shein.com/..."></textarea>
+  <!-- HEADER -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="#accueil" class="logo">Drop<span>Shop</span></a>
 
-      <div class="defaults-panel">
-        <div class="defaults-title">⚙️ Valeurs par défaut</div>
-        <div class="defaults-grid">
-          <div class="field-row">
-            <span class="field-label">Type d'article</span>
-            <select class="field-input" id="def-type">
-              <option value="">— Choisir —</option>
-              <option value="top">Top / Haut</option>
-              <option value="robe-courte">Robe courte</option>
-              <option value="robe-longue">Robe longue</option>
-              <option value="autre">Autre</option>
-            </select>
-          </div>
-          <div class="field-row">
-            <span class="field-label">Prix d'achat (€)</span>
-            <input class="field-input" id="def-prix" type="number" placeholder="ex: 8" step="0.01" min="0">
-          </div>
-          <div class="field-row">
-            <span class="field-label">Matière</span>
-            <input class="field-input" id="def-mat" placeholder="ex: 100% Viscose">
-          </div>
-          <div class="field-row">
-            <span class="field-label">Catégorie</span>
-            <input class="field-input" id="def-cat" placeholder="ex: Robe fleurie">
-          </div>
-        </div>
+      <nav id="navLinks" class="nav-links">
+        <a href="#accueil">Accueil</a>
+        <a href="#catalogue">Catalogue</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="nav-actions">
+        <input id="searchInput" class="search-input" type="text" placeholder="Rechercher un produit..." />
+        <button id="cartBtn" class="cart-btn" aria-label="Panier">
+          🛒 <span id="cartCount" class="cart-count hidden">0</span>
+        </button>
+        <button id="menuToggle" class="menu-toggle" aria-label="Menu">☰</button>
       </div>
+    </div>
+  </header>
 
-      <button id="generateBtn" class="btn-go">Charger les articles</button>
+  <!-- HERO -->
+  <section id="accueil" class="hero">
+    <div class="hero-content">
+      <span class="hero-badge">✨ Livraison directe depuis nos fournisseurs</span>
+      <h1>Des produits tendance, livrés chez vous</h1>
+      <p>Découvrez notre sélection soigneusement choisie d'articles high-tech, mode, maison et bien-être — au meilleur prix.</p>
+      <a href="#catalogue" class="btn-primary">Voir le catalogue</a>
+    </div>
+  </section>
+
+  <!-- CATALOGUE -->
+  <section id="catalogue" class="catalogue">
+    <div class="section-head">
+      <h2>Notre catalogue</h2>
+      <p>Ajoutez vos articles préférés au panier et commandez en quelques clics.</p>
+    </div>
+
+    <div id="categoryFilters" class="category-filters"></div>
+
+    <div id="productsGrid" class="products-grid"></div>
+    <p id="noResults" class="no-results hidden">Aucun produit ne correspond à votre recherche.</p>
+  </section>
+
+  <!-- POURQUOI NOUS -->
+  <section class="features">
+    <div class="feature">
+      <span class="feature-icon">🚚</span>
+      <h3>Livraison suivie</h3>
+      <p>Chaque commande est expédiée avec un numéro de suivi.</p>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">🔒</span>
+      <h3>Paiement sécurisé</h3>
+      <p>Paiement par carte via Stripe ou commande directe par message.</p>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">💬</span>
+      <h3>Support réactif</h3>
+      <p>Une question ? Contactez-nous par WhatsApp ou email.</p>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="contact">
+    <div class="section-head">
+      <h2>Une question ?</h2>
+      <p>Contactez-nous directement, nous répondons rapidement.</p>
+    </div>
+    <div class="contact-actions">
+      <a id="contactWhatsapp" class="btn-secondary" href="#" target="_blank" rel="noopener">💬 WhatsApp</a>
+      <a id="contactEmail" class="btn-secondary" href="#">✉️ Email</a>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <p>© <span id="year"></span> DropShop — Tous droits réservés.</p>
+  </footer>
+
+  <!-- PANIER (drawer) -->
+  <div id="cartOverlay" class="overlay hidden"></div>
+  <aside id="cartDrawer" class="cart-drawer">
+    <div class="cart-header">
+      <h3>Votre panier</h3>
+      <button id="cartClose" class="icon-btn" aria-label="Fermer">✕</button>
+    </div>
+    <div id="cartItems" class="cart-items"></div>
+    <p id="cartEmpty" class="cart-empty">Votre panier est vide.</p>
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <span id="cartTotal">0,00 €</span>
+      </div>
+      <button id="checkoutBtn" class="btn-primary full">Commander</button>
+    </div>
+  </aside>
+
+  <!-- PRODUIT (modal) -->
+  <div id="productModal" class="modal hidden">
+    <div class="modal-box product-modal-box">
+      <button class="icon-btn modal-close" data-close="productModal">✕</button>
+      <div id="productModalContent"></div>
     </div>
   </div>
 
-  <!-- ÉCRAN PRINCIPAL -->
-  <div id="mainScreen" class="hidden">
-    <header>
-      <span class="logo">Shein → Vinted</span>
-      <button id="backBtn" class="btn-back">+ Nouveaux liens</button>
-    </header>
+  <!-- CHECKOUT (modal) -->
+  <div id="checkoutModal" class="modal hidden">
+    <div class="modal-box">
+      <button class="icon-btn modal-close" data-close="checkoutModal">✕</button>
+      <h3>Finaliser la commande</h3>
+      <p class="checkout-sub">Remplissez vos informations puis choisissez votre mode de commande.</p>
 
-    <div id="tabsBar" class="tabs-bar hidden"></div>
+      <form id="checkoutForm" class="checkout-form">
+        <label>Nom complet
+          <input type="text" id="ckName" required placeholder="Jean Dupont" />
+        </label>
+        <label>Email
+          <input type="email" id="ckEmail" required placeholder="jean@email.com" />
+        </label>
+        <label>Téléphone
+          <input type="tel" id="ckPhone" placeholder="+33 6 12 34 56 78" />
+        </label>
+        <label>Adresse de livraison
+          <textarea id="ckAddress" required placeholder="Adresse, ville, code postal, pays"></textarea>
+        </label>
 
-    <div class="cards-wrapper">
-      <div id="cardsList"></div>
+        <div class="order-summary">
+          <div class="order-summary-title">Récapitulatif</div>
+          <div id="checkoutSummary"></div>
+          <div class="order-summary-total">
+            <span>Total à payer</span>
+            <span id="checkoutTotal">0,00 €</span>
+          </div>
+        </div>
 
-      <!-- ARTICLES ENREGISTRÉS -->
-      <div id="savedSection" class="hidden">
-        <div class="saved-section-title">
-          <span>📋 Articles enregistrés</span>
-          <button class="copy-btn" onclick="copyAllSaved()">Tout copier</button>
+        <div class="checkout-methods">
+          <button type="button" id="payStripeBtn" class="btn-primary full">💳 Payer par carte</button>
+          <button type="button" id="payWhatsappBtn" class="btn-secondary full">💬 Commander via WhatsApp</button>
+          <button type="button" id="payEmailBtn" class="btn-secondary full">✉️ Commander par email</button>
         </div>
-        <div id="savedList"></div>
-      </div>
-
-      <!-- TOTAUX -->
-      <div class="totals-bar">
-        <div class="total-block">
-          <span class="total-label">TOTAL ACHAT</span>
-          <span class="total-val" id="totalAchat">0,00 €</span>
-        </div>
-        <div class="total-sep"></div>
-        <div class="total-block">
-          <span class="total-label">TOTAL REVENTE</span>
-          <span class="total-val pink" id="totalRevente">0,00 €</span>
-        </div>
-        <div class="total-sep"></div>
-        <div class="total-block">
-          <span class="total-label">BÉNÉFICE</span>
-          <span class="total-val green" id="totalBenef">0,00 €</span>
-        </div>
-      </div>
+      </form>
     </div>
   </div>
 
